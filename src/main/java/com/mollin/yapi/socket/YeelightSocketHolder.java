@@ -22,6 +22,7 @@ public class YeelightSocketHolder {
      * Socket IP
      */
     private String ip;
+
     /**
      * Socket port
      */
@@ -96,5 +97,13 @@ public class YeelightSocketHolder {
         } catch (Exception e) {
             throw new YeelightSocketException(e);
         }
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

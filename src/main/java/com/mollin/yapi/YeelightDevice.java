@@ -122,6 +122,18 @@ public class YeelightDevice {
     }
 
     /**
+     * Send command on socket
+     * @param command Command to send
+     * @return Raw result array
+     * @throws YeelightSocketException when socket error occurs
+     * @throws YeelightResultErrorException when command result is an error
+     */
+    private void sendCommandNoRes(YeelightCommand command) throws YeelightSocketException, YeelightResultErrorException {
+        String jsonCommand = command.toJson() + "\r\n";
+        this.socketHolder.send(jsonCommand);
+    }
+
+    /**
      * Retrieve properties of device
      * @param properties Required properties (if no property is specified, all properties are retrieve)
      * @return Required properties map (Property → string value)
@@ -309,5 +321,21 @@ public class YeelightDevice {
         }
         YeelightCommand command = new YeelightCommand("set_name", name);
         this.sendCommand(command);
+    }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////// Ajout personnel
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void setMusic(int value) throws Exception {
+        if(value < 0 || value > 1 ){
+            throw new Exception("YeelightDevice.setMusic EXCEPTION : value != 0 || 1");
+        } else {
+            YeelightCommand command = new YeelightCommand("set_music", value, "192.168.1.24", 54321);
+            this.sendCommandNoRes(command);
+        }
+
     }
 }
