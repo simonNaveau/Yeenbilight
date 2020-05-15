@@ -15,16 +15,23 @@ public class TestingPerso {
     public static void main(String[] args) throws Exception {
 
         System.out.println("### Starting configuration ###");
-        YeelightDevice device = new YeelightDevice("192.168.1.34");
-        device.setPower(true);
-        device.setEffect(YeelightEffect.SMOOTH);
-        device.setDuration(300);
-        device.setBrightness(1);
+        YeelightDevice lit = new YeelightDevice("192.168.1.36");
+        lit.setPower(true);
+        lit.setEffect(YeelightEffect.SMOOTH);
+        lit.setDuration(300);
+        lit.setBrightness(1);
+
+//        YeelightDevice plafonier = new YeelightDevice("192.168.1.34");
+//        plafonier.setPower(true);
+//        plafonier.setEffect(YeelightEffect.SMOOTH);
+//        plafonier.setDuration(300);
+//        plafonier.setBrightness(10);
+
         System.out.println("### Configuration ended successfully ###");
         System.out.println("### Starting connection ###");
         try{
-            device.setMusic(1);
-            System.out.println(device.getProperties().toString());
+            lit.setMusic(1, "192.168.1.24", 54321);
+            //plafonier.setMusic(1, "192.168.1.24", 54322);
         } catch (Exception e){
             System.out.println(e.getMessage());
         }

@@ -329,11 +329,11 @@ public class YeelightDevice {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////// Ajout personnel
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void setMusic(int value) throws Exception {
+    public void setMusic(int value, String serveurIp, int serveurPort) throws Exception {
         if(value < 0 || value > 1 ){
             throw new Exception("YeelightDevice.setMusic EXCEPTION : value != 0 || 1");
         } else {
-            YeelightCommand command = new YeelightCommand("set_music", value, "192.168.1.24", 54321);
+            YeelightCommand command = new YeelightCommand("set_music", value, serveurIp, serveurPort);
             this.sendCommandNoRes(command);
         }
 

@@ -19,7 +19,9 @@ class TCPServer {
     /**
      * Socket writer
      */
-    private static  BufferedWriter socketWriter;
+    private static  BufferedWriter socketWriterLit;
+
+    private static  BufferedWriter socketWriterPlafonier;
 
     public static int[] color;
 
@@ -31,11 +33,19 @@ class TCPServer {
 
 
         InetAddress addr = InetAddress.getByName("192.168.1.24");//Local PC address
-        ServerSocket sock = new ServerSocket(54321, 50, addr);
-        System.out.println("The socket start at : "+sock.getInetAddress()+" : "+sock.getLocalPort());
-        Socket socket = sock.accept();
-        socket.setSoTimeout(1000);
-        socketWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+        ServerSocket sockLit = new ServerSocket(54321, 50, addr);
+        System.out.println("The socket start at : "+sockLit.getInetAddress()+" : "+sockLit.getLocalPort());
+
+        //ServerSocket sockPlafonier = new ServerSocket(54322, 50, addr);
+        //System.out.println("The socket start at : "+sockPlafonier.getInetAddress()+" : "+sockPlafonier.getLocalPort());
+
+        Socket socketLit = sockLit.accept();
+        //Socket socketPlafonier = sockPlafonier.accept();
+        socketLit.setSoTimeout(1000);
+        //socketPlafonier.setSoTimeout(1000);
+        socketWriterLit = new BufferedWriter(new OutputStreamWriter(socketLit.getOutputStream()));
+        //socketWriterPlafonier = new BufferedWriter(new OutputStreamWriter(socketPlafonier.getOutputStream()));
 
         int[] tmpColor;
         YeelightCommand command;
@@ -45,6 +55,8 @@ class TCPServer {
             try {
                 monitorL.takeScreen();
                 tmpColor = monitorL.fullShotAnalyse();
+//                monitorR.takeScreen();
+//                tmpColor = monitorR.fullShotAnalyse();
                 if (Utils.detectChange(color, tmpColor)){
                     command = setRGB(tmpColor[0], tmpColor[1], tmpColor[2]);
                     jsonCommand = command.toJson() + "\r\n";
@@ -65,8 +77,10 @@ class TCPServer {
      */
     public static void send(String datas) throws YeelightSocketException {
         try {
-            socketWriter.write(datas);
-            socketWriter.flush();
+            socketWriterLit.write(datas);
+            socketWriterLit.flush();
+//            socketWriterPlafonier.write(datas);
+//            socketWriterPlafonier.flush();
         } catch (Exception e) {
             throw new YeelightSocketException(e);
         }
