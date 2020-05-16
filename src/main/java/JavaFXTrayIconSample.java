@@ -2,9 +2,11 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -18,6 +20,10 @@ import jfxtras.styles.jmetro.JMetroStyleClass;
 import jfxtras.styles.jmetro.Style;
 
 import javax.imageio.ImageIO;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -28,11 +34,6 @@ import java.util.TimerTask;
 
 // Java 8 code
 public class JavaFXTrayIconSample extends Application {
-
-    // one icon location is shared between the application tray icon and task bar icon.
-    // you could also use multiple icons to allow for clean display of tray icons on hi-dpi devices.
-    private static final String iconImageLoc =
-            "http://icons.iconarchive.com/icons/scafer31000/bubble-circle-3/16/GameCenter-icon.png";
 
     // application stage is stored so that it can be shown and hidden based on system tray icon operations.
     private Stage stage;
@@ -61,13 +62,6 @@ public class JavaFXTrayIconSample extends Application {
 
         // out stage will be translucent, so give it a transparent style.
         stage.initStyle(StageStyle.TRANSPARENT);
-
-        Slider slider = new Slider(0, 100, 1);
-        slider.setShowTickMarks(false);
-        slider.setShowTickLabels(false);
-        slider.setOrientation(Orientation.VERTICAL);
-        slider.setMajorTickUnit(0.25f);
-        slider.setBlockIncrement(0.1f);
 
         HBox main = new HBox();
         main.getStyleClass().add(JMetroStyleClass.BACKGROUND);
@@ -100,15 +94,30 @@ public class JavaFXTrayIconSample extends Application {
         mainLeftBottom.getChildren().add(light2Container);
         mainLeftBottom.setHgrow(light2Container, Priority.ALWAYS);
 
+        Slider slider = new Slider(0, 100, 1);
+        slider.setShowTickMarks(false);
+        slider.setShowTickLabels(false);
+        slider.setOrientation(Orientation.VERTICAL);
+        slider.setMajorTickUnit(0.25f);
+        slider.setBlockIncrement(0.1f);
+        VBox sliderVbox = new VBox();
+        Label sliderLabel = new Label("Brightness");
+        sliderVbox.getChildren().add(slider);
+        sliderVbox.getChildren().add(sliderLabel);
+        sliderLabel.setStyle("-fx-padding: 0 0 10 0");
+        sliderVbox.setVgrow(slider, Priority.ALWAYS);
+        sliderVbox.setMargin(slider, new Insets(5, 25, 5, 25));
+        sliderVbox.setAlignment(Pos.CENTER);
+
+
+
         mainLeft.getChildren().add(mainLeftTop);
         mainLeft.setVgrow(mainLeftTop, Priority.ALWAYS);
         mainLeft.getChildren().add(mainLeftBottom);
         mainLeft.setVgrow(mainLeftBottom, Priority.ALWAYS);
         main.getChildren().add(mainLeft);
         main.setHgrow(mainLeft, Priority.ALWAYS);
-        main.getChildren().add(slider);
-        main.setMargin(slider, new Insets(10, 25, 10, 25));
-        main.setHgrow(slider, Priority.ALWAYS);
+        main.getChildren().add(sliderVbox);
 
         Scene scene = new Scene(main, 500, 200);
         jMetro.setScene(scene);
@@ -120,6 +129,13 @@ public class JavaFXTrayIconSample extends Application {
         stage.setY(primaryScreenBounds.getMinY() + primaryScreenBounds.getHeight() - 200);
         stage.setWidth(500);
         stage.setHeight(200);
+
+        //Hide the stage when click outside of it
+        stage.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (! isNowFocused) {
+                stage.hide();
+            }
+        });
     }
 
     /**
@@ -140,8 +156,40 @@ public class JavaFXTrayIconSample extends Application {
             java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
             java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(ImageIO.read(new File("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\app_icon.png")));
 
-            // if the user double-clicks on the tray icon, show the main app stage.
-            trayIcon.addActionListener(event -> Platform.runLater(this::showStage));
+            // if the user clicks on the tray icon, show the main app stage.
+            trayIcon.addMouseListener(new MouseListener() {
+                private void showStage() {
+                    if (stage != null) {
+                        stage.show();
+                        stage.toFront();
+                    }
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    //Show the stage after a simple click
+                    Platform.runLater(this::showStage);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+
+                }
+            });
 
             // if the user selects the default menu item (which includes the app name),
             // show the main app stage.
@@ -200,7 +248,7 @@ public class JavaFXTrayIconSample extends Application {
     /**
      * Shows the application stage and ensures that it is brought ot the front of all stages.
      */
-    public void showStage() {
+    private void showStage() {
         if (stage != null) {
             stage.show();
             stage.toFront();
