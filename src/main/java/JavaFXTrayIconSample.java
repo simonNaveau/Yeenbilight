@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -20,17 +22,15 @@ import jfxtras.styles.jmetro.JMetroStyleClass;
 import jfxtras.styles.jmetro.Style;
 
 import javax.imageio.ImageIO;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
 
 // Java 8 code
 public class JavaFXTrayIconSample extends Application {
@@ -68,29 +68,68 @@ public class JavaFXTrayIconSample extends Application {
         VBox mainLeft = new VBox();
         HBox mainLeftTop = new HBox();
 
-        Button screen1 = new Button("Screen1");
+        Button screen1 = new Button();
+        ImageView screenView1 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\screen_icon.png")));
+        screenView1.setFitWidth(65);
+        screenView1.setFitHeight(65);
+        screen1.setGraphic(screenView1);
+        screen1.setStyle("-fx-background-color: transparent");
+        screen1.setFocusTraversable(false);
+        Label screen1Label = new Label("Screen 1");
         BorderPane screen1Container = new BorderPane();
         screen1Container.setCenter(screen1);
+        screen1Container.setAlignment(screen1Label, Pos.CENTER);
+        screen1Container.setBottom(screen1Label);
         mainLeftTop.getChildren().add(screen1Container);
         mainLeftTop.setHgrow(screen1Container, Priority.ALWAYS);
 
-        Button screen2 = new Button("Screen2");
+        Button screen2 = new Button();
+        ImageView screenView2 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\screen_icon.png")));
+        screenView2.setFitWidth(65);
+        screenView2.setFitHeight(65);
+        screen2.setGraphic(screenView2);
+        screen2.setStyle("-fx-background-color: transparent");
+        screen2.setFocusTraversable(false);
+        Label screen2Label = new Label("Screen 2");
         BorderPane screen2Container = new BorderPane();
         screen2Container.setCenter(screen2);
+        screen2Container.setAlignment(screen2Label, Pos.CENTER);
+        screen2Container.setBottom(screen2Label);
         mainLeftTop.getChildren().add(screen2Container);
         mainLeftTop.setHgrow(screen2Container, Priority.ALWAYS);
 
         HBox mainLeftBottom = new HBox();
 
-        Button light1 = new Button("Light1");
+        Button light1 = new Button();
+        ImageView lightView1 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\light_icon.png")));
+        lightView1.setFitWidth(65);
+        lightView1.setFitHeight(65);
+        light1.setGraphic(lightView1);
+        light1.setStyle("-fx-background-color: transparent");
+        light1.setFocusTraversable(false);
+        Label light1Label = new Label("Light 1");
         BorderPane light1Container = new BorderPane();
+        light1Container.setAlignment(light1Label, Pos.CENTER);
         light1Container.setCenter(light1);
+        light1Container.setBottom(light1Label);
+        light1Label.setStyle("-fx-padding: 0 0 10 0");
+
         mainLeftBottom.getChildren().add(light1Container);
         mainLeftBottom.setHgrow(light1Container, Priority.ALWAYS);
 
-        Button light2 = new Button("Light2");
+        Button light2 = new Button();
+        ImageView lightView2 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\light_icon.png")));
+        lightView2.setFitWidth(65);
+        lightView2.setFitHeight(65);
+        light2.setGraphic(lightView2);
+        light2.setStyle("-fx-background-color: transparent");
+        light2.setFocusTraversable(false);
+        Label light2Label = new Label("Light 2");
         BorderPane light2Container = new BorderPane();
+        light2Container.setAlignment(light2Label, Pos.CENTER);
+        light2Container.setBottom(light2Label);
         light2Container.setCenter(light2);
+        light2Label.setStyle("-fx-padding: 0 0 10 0");
         mainLeftBottom.getChildren().add(light2Container);
         mainLeftBottom.setHgrow(light2Container, Priority.ALWAYS);
 
@@ -100,6 +139,7 @@ public class JavaFXTrayIconSample extends Application {
         slider.setOrientation(Orientation.VERTICAL);
         slider.setMajorTickUnit(0.25f);
         slider.setBlockIncrement(0.1f);
+        slider.setFocusTraversable(false);
         VBox sliderVbox = new VBox();
         Label sliderLabel = new Label("Brightness");
         sliderVbox.getChildren().add(slider);
@@ -110,7 +150,6 @@ public class JavaFXTrayIconSample extends Application {
         sliderVbox.setAlignment(Pos.CENTER);
 
 
-
         mainLeft.getChildren().add(mainLeftTop);
         mainLeft.setVgrow(mainLeftTop, Priority.ALWAYS);
         mainLeft.getChildren().add(mainLeftBottom);
@@ -119,20 +158,20 @@ public class JavaFXTrayIconSample extends Application {
         main.setHgrow(mainLeft, Priority.ALWAYS);
         main.getChildren().add(sliderVbox);
 
-        Scene scene = new Scene(main, 500, 200);
+        Scene scene = new Scene(main, 400, 250);
         jMetro.setScene(scene);
         stage.setScene(scene);
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
 
         //set Stage boundaries to the lower right corner of the visible bounds of the main screen
-        stage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 500);
-        stage.setY(primaryScreenBounds.getMinY() + primaryScreenBounds.getHeight() - 200);
-        stage.setWidth(500);
-        stage.setHeight(200);
+        stage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 400);
+        stage.setY(primaryScreenBounds.getMinY() + primaryScreenBounds.getHeight() - 250);
+        stage.setWidth(400);
+        stage.setHeight(250);
 
         //Hide the stage when click outside of it
         stage.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-            if (! isNowFocused) {
+            if (!isNowFocused) {
                 stage.hide();
             }
         });
@@ -220,22 +259,22 @@ public class JavaFXTrayIconSample extends Application {
             trayIcon.setPopupMenu(popup);
 
             // create a timer which periodically displays a notification message.
-            notificationTimer.schedule(
-                    new TimerTask() {
-                        @Override
-                        public void run() {
-                            javax.swing.SwingUtilities.invokeLater(() ->
-                                    trayIcon.displayMessage(
-                                            "hello",
-                                            "The time is now " + timeFormat.format(new Date()),
-                                            java.awt.TrayIcon.MessageType.INFO
-                                    )
-                            );
-                        }
-                    },
-                    5_000,
-                    60_000
-            );
+//            notificationTimer.schedule(
+//                    new TimerTask() {
+//                        @Override
+//                        public void run() {
+//                            javax.swing.SwingUtilities.invokeLater(() ->
+//                                    trayIcon.displayMessage(
+//                                            "hello",
+//                                            "The time is now " + timeFormat.format(new Date()),
+//                                            java.awt.TrayIcon.MessageType.INFO
+//                                    )
+//                            );
+//                        }
+//                    },
+//                    5_000,
+//                    60_000
+//            );
 
             // add the application tray icon to the system tray.
             tray.add(trayIcon);
