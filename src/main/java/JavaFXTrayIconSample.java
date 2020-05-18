@@ -1,5 +1,7 @@
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -8,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -24,10 +27,7 @@ import jfxtras.styles.jmetro.Style;
 import javax.imageio.ImageIO;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Timer;
@@ -63,102 +63,7 @@ public class JavaFXTrayIconSample extends Application {
         // out stage will be translucent, so give it a transparent style.
         stage.initStyle(StageStyle.TRANSPARENT);
 
-        HBox main = new HBox();
-        main.getStyleClass().add(JMetroStyleClass.BACKGROUND);
-        VBox mainLeft = new VBox();
-        HBox mainLeftTop = new HBox();
-
-        Button screen1 = new Button();
-        ImageView screenView1 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\screen_icon.png")));
-        screenView1.setFitWidth(65);
-        screenView1.setFitHeight(65);
-        screen1.setGraphic(screenView1);
-        screen1.setStyle("-fx-background-color: transparent");
-        screen1.setFocusTraversable(false);
-        Label screen1Label = new Label("Screen 1");
-        BorderPane screen1Container = new BorderPane();
-        screen1Container.setCenter(screen1);
-        screen1Container.setAlignment(screen1Label, Pos.CENTER);
-        screen1Container.setBottom(screen1Label);
-        mainLeftTop.getChildren().add(screen1Container);
-        mainLeftTop.setHgrow(screen1Container, Priority.ALWAYS);
-
-        Button screen2 = new Button();
-        ImageView screenView2 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\screen_icon.png")));
-        screenView2.setFitWidth(65);
-        screenView2.setFitHeight(65);
-        screen2.setGraphic(screenView2);
-        screen2.setStyle("-fx-background-color: transparent");
-        screen2.setFocusTraversable(false);
-        Label screen2Label = new Label("Screen 2");
-        BorderPane screen2Container = new BorderPane();
-        screen2Container.setCenter(screen2);
-        screen2Container.setAlignment(screen2Label, Pos.CENTER);
-        screen2Container.setBottom(screen2Label);
-        mainLeftTop.getChildren().add(screen2Container);
-        mainLeftTop.setHgrow(screen2Container, Priority.ALWAYS);
-
-        HBox mainLeftBottom = new HBox();
-
-        Button light1 = new Button();
-        ImageView lightView1 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\light_icon.png")));
-        lightView1.setFitWidth(65);
-        lightView1.setFitHeight(65);
-        light1.setGraphic(lightView1);
-        light1.setStyle("-fx-background-color: transparent");
-        light1.setFocusTraversable(false);
-        Label light1Label = new Label("Light 1");
-        BorderPane light1Container = new BorderPane();
-        light1Container.setAlignment(light1Label, Pos.CENTER);
-        light1Container.setCenter(light1);
-        light1Container.setBottom(light1Label);
-        light1Label.setStyle("-fx-padding: 0 0 10 0");
-
-        mainLeftBottom.getChildren().add(light1Container);
-        mainLeftBottom.setHgrow(light1Container, Priority.ALWAYS);
-
-        Button light2 = new Button();
-        ImageView lightView2 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\light_icon.png")));
-        lightView2.setFitWidth(65);
-        lightView2.setFitHeight(65);
-        light2.setGraphic(lightView2);
-        light2.setStyle("-fx-background-color: transparent");
-        light2.setFocusTraversable(false);
-        Label light2Label = new Label("Light 2");
-        BorderPane light2Container = new BorderPane();
-        light2Container.setAlignment(light2Label, Pos.CENTER);
-        light2Container.setBottom(light2Label);
-        light2Container.setCenter(light2);
-        light2Label.setStyle("-fx-padding: 0 0 10 0");
-        mainLeftBottom.getChildren().add(light2Container);
-        mainLeftBottom.setHgrow(light2Container, Priority.ALWAYS);
-
-        Slider slider = new Slider(0, 100, 1);
-        slider.setShowTickMarks(false);
-        slider.setShowTickLabels(false);
-        slider.setOrientation(Orientation.VERTICAL);
-        slider.setMajorTickUnit(0.25f);
-        slider.setBlockIncrement(0.1f);
-        slider.setFocusTraversable(false);
-        VBox sliderVbox = new VBox();
-        Label sliderLabel = new Label("Brightness");
-        sliderVbox.getChildren().add(slider);
-        sliderVbox.getChildren().add(sliderLabel);
-        sliderLabel.setStyle("-fx-padding: 0 0 10 0");
-        sliderVbox.setVgrow(slider, Priority.ALWAYS);
-        sliderVbox.setMargin(slider, new Insets(5, 25, 5, 25));
-        sliderVbox.setAlignment(Pos.CENTER);
-
-
-        mainLeft.getChildren().add(mainLeftTop);
-        mainLeft.setVgrow(mainLeftTop, Priority.ALWAYS);
-        mainLeft.getChildren().add(mainLeftBottom);
-        mainLeft.setVgrow(mainLeftBottom, Priority.ALWAYS);
-        main.getChildren().add(mainLeft);
-        main.setHgrow(mainLeft, Priority.ALWAYS);
-        main.getChildren().add(sliderVbox);
-
-        Scene scene = new Scene(main, 400, 250);
+        Scene scene = new Scene(generateUI(), 400, 250);
         jMetro.setScene(scene);
         stage.setScene(scene);
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -177,6 +82,164 @@ public class JavaFXTrayIconSample extends Application {
         });
     }
 
+    private HBox generateUI() throws FileNotFoundException {
+        HBox main = new HBox();
+        main.getStyleClass().add(JMetroStyleClass.BACKGROUND);
+        VBox mainLeft = new VBox();
+
+        HBox mainLeftTop = new HBox();
+        //Creating right screen button
+        ToggleButton  screen1 = new ToggleButton();
+        ImageView screenView1 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\screen_icon.png")));
+        screenView1.setFitWidth(65);
+        screenView1.setFitHeight(65);
+        screen1.setGraphic(screenView1);
+        screen1.setStyle("-fx-background-color: transparent");
+        screen1.setFocusTraversable(false);
+        Label screen1Label = new Label("Screen 1");
+        VBox screen1Container = new VBox();
+        screen1Container.setAlignment(Pos.CENTER);
+        screen1Container.getChildren().add(screen1);
+        screen1Container.getChildren().add(screen1Label);
+        screen1Container.setVgrow(screen1, Priority.ALWAYS);
+        screen1Label.setStyle("-fx-padding: 0 0 10 0");
+        mainLeftTop.getChildren().add(screen1Container);
+        mainLeftTop.setHgrow(screen1Container, Priority.ALWAYS);
+
+        //Creating right screen button
+        ToggleButton screen2 = new ToggleButton();
+        ImageView screenView2 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\screen_icon.png")));
+        screenView2.setFitWidth(65);
+        screenView2.setFitHeight(65);
+        screen2.setGraphic(screenView2);
+        screen2.setStyle("-fx-background-color: transparent");
+        screen2.setFocusTraversable(false);
+        Label screen2Label = new Label("Screen 2");
+        VBox screen2Container = new VBox();
+        screen2Container.setAlignment(Pos.CENTER);
+        screen2Container.getChildren().add(screen2);
+        screen2Container.getChildren().add(screen2Label);
+        screen2Container.setVgrow(screen2, Priority.ALWAYS);
+        screen2Label.setStyle("-fx-padding: 0 0 10 0");
+        mainLeftTop.getChildren().add(screen2Container);
+        mainLeftTop.setHgrow(screen2Container, Priority.ALWAYS);
+
+        HBox mainLeftBottom = new HBox();
+        //Creating left light button
+        ToggleButton light1 = new ToggleButton();
+        ImageView lightView1 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\light_icon.png")));
+        lightView1.setFitWidth(65);
+        lightView1.setFitHeight(65);
+        light1.setGraphic(lightView1);
+        light1.setStyle("-fx-background-color: transparent");
+        light1.setFocusTraversable(false);
+        Label light1Label = new Label("Light 1");
+        VBox light1Container = new VBox();
+        light1Container.setAlignment(Pos.CENTER);
+        light1Container.getChildren().add(light1);
+        light1Container.getChildren().add(light1Label);
+        light1Container.setVgrow(light1, Priority.ALWAYS);
+        light1Label.setStyle("-fx-padding: 0 0 10 0");
+        mainLeftBottom.getChildren().add(light1Container);
+        mainLeftBottom.setHgrow(light1Container, Priority.ALWAYS);
+
+        //Creating right light button
+        ToggleButton light2 = new ToggleButton();
+        ImageView lightView2 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\light_icon.png")));
+        lightView2.setFitWidth(65);
+        lightView2.setFitHeight(65);
+        light2.setGraphic(lightView2);
+        light2.setStyle("-fx-background-color: #252525");
+        light2.setFocusTraversable(false);
+        Label light2Label = new Label("Light 2");
+        VBox light2Container = new VBox();
+        light2Container.setAlignment(Pos.CENTER);
+        light2Container.getChildren().add(light2);
+        light2Container.getChildren().add(light2Label);
+        light2Container.setVgrow(light2, Priority.ALWAYS);
+        light2Label.setStyle("-fx-padding: 0 0 10 0");
+        mainLeftBottom.getChildren().add(light2Container);
+        mainLeftBottom.setHgrow(light2Container, Priority.ALWAYS);
+
+        //Creating the slider
+        Slider slider = new Slider(0, 100, 1);
+        slider.setShowTickMarks(false);
+        slider.setShowTickLabels(false);
+        slider.setOrientation(Orientation.VERTICAL);
+        slider.setMajorTickUnit(0.25f);
+        slider.setBlockIncrement(0.1f);
+        slider.setFocusTraversable(false);
+        VBox sliderVbox = new VBox();
+        Label sliderLabel = new Label("Brightness");
+        sliderVbox.getChildren().add(slider);
+        sliderVbox.getChildren().add(sliderLabel);
+        sliderLabel.setStyle("-fx-padding: 0 0 10 0");
+        sliderVbox.setVgrow(slider, Priority.ALWAYS);
+        sliderVbox.setMargin(slider, new Insets(5, 25, 5, 25));
+        sliderVbox.setAlignment(Pos.CENTER);
+
+        //Adding the panels on the main Hbox
+        mainLeft.getChildren().add(mainLeftTop);
+        mainLeft.setVgrow(mainLeftTop, Priority.ALWAYS);
+        mainLeft.getChildren().add(mainLeftBottom);
+        mainLeft.setVgrow(mainLeftBottom, Priority.ALWAYS);
+        main.getChildren().add(mainLeft);
+        main.setHgrow(mainLeft, Priority.ALWAYS);
+        main.getChildren().add(sliderVbox);
+        main.setStyle("-fx-border-color: #404040");
+
+        //Set all reaction to clicks on buttons
+        screen1.setOnAction(event -> {
+            if(screen1.isSelected()){
+                screen1.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
+                        "    -fx-background-radius: 30;\n" +
+                        "    -fx-background-insets: 0;\n" +
+                        "    -fx-text-fill: white;");
+            } else {
+                screen1.setStyle("-fx-background-color: transparent");
+            }
+
+        });
+
+        screen2.setOnAction(event -> {
+            if(screen2.isSelected()){
+                screen2.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
+                        "    -fx-background-radius: 30;\n" +
+                        "    -fx-background-insets: 0;\n" +
+                        "    -fx-text-fill: white;");
+            } else {
+                screen2.setStyle("-fx-background-color: transparent");
+            }
+        });
+
+        light1.setOnAction(event -> {
+            if(light1.isSelected()){
+                light1.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
+                        "    -fx-background-radius: 30;\n" +
+                        "    -fx-background-insets: 0;\n" +
+                        "    -fx-text-fill: white;");
+            } else {
+                light1.setStyle("-fx-background-color: transparent");
+            }
+        });
+
+        light2.setOnAction(event -> {
+            if(light2.isSelected()){
+                light2.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
+                        "    -fx-background-radius: 30;\n" +
+                        "    -fx-background-insets: 0;\n" +
+                        "    -fx-text-fill: white;");
+            } else {
+                light2.setStyle("-fx-background-color: transparent");
+            }
+        });
+
+        slider.valueProperty().addListener((obs, o, n)->{
+            System.out.println(slider.getValue());
+        });
+
+        return main;
+    }
     /**
      * Sets up a system tray icon for the application.
      */
