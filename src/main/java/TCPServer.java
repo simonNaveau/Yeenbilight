@@ -6,15 +6,17 @@ import fr.cerbere.screenapp.Utils;
 
 import java.awt.*;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import static com.mollin.yapi.utils.YeelightUtils.clampAndComputeRGBValue;
 
-class TCPServer {
+class TCPServer extends Thread {
 
     /**
      * Socket writer
@@ -25,20 +27,24 @@ class TCPServer {
 
     public static int[] color;
 
-    public static void main(String argv[]) throws Exception {
+    public ScreenAnalyser monitorL;
+
+    public ScreenAnalyser monitorR;
+
+    public String screenToCheck;
+
+    public TCPServer(String serverIp, int serveurPort, String screenToCheck) throws AWTException, IOException {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice[] screens = ge.getScreenDevices();
-        ScreenAnalyser monitorL = new ScreenAnalyser(screens[0]);
-        //ScreenAnalyser monitorR = new ScreenAnalyser(screens[1]);
+        monitorL = new ScreenAnalyser(screens[0]);
+        monitorR = new ScreenAnalyser(screens[1]);
 
-
-        InetAddress addr = InetAddress.getByName("192.168.1.24");//Local PC address
-
-        ServerSocket sockLit = new ServerSocket(54321, 50, addr);
+        InetAddress addr = InetAddress.getByName(serverIp);//Local PC address
+        ServerSocket sockLit = new ServerSocket(serveurPort, 50, addr);
         System.out.println("The socket start at : "+sockLit.getInetAddress()+" : "+sockLit.getLocalPort());
 
-        //ServerSocket sockPlafonier = new ServerSocket(54322, 50, addr);
-        //System.out.println("The socket start at : "+sockPlafonier.getInetAddress()+" : "+sockPlafonier.getLocalPort());
+        ServerSocket sockPlafonier = new ServerSocket(serveurPort+1, 50, addr);
+        System.out.println("The socket start at : "+sockPlafonier.getInetAddress()+" : "+sockPlafonier.getLocalPort());
 
         Socket socketLit = sockLit.accept();
         //Socket socketPlafonier = sockPlafonier.accept();
@@ -46,26 +52,45 @@ class TCPServer {
         //socketPlafonier.setSoTimeout(1000);
         socketWriterLit = new BufferedWriter(new OutputStreamWriter(socketLit.getOutputStream()));
         //socketWriterPlafonier = new BufferedWriter(new OutputStreamWriter(socketPlafonier.getOutputStream()));
+        this.screenToCheck = screenToCheck;
+    }
 
+    public void run() {
         int[] tmpColor;
         YeelightCommand command;
         String jsonCommand;
 
-        while (true) {
-            try {
-                monitorL.takeScreen();
-                tmpColor = monitorL.fullShotAnalyse();
-//                monitorR.takeScreen();
-//                tmpColor = monitorR.fullShotAnalyse();
-                if (Utils.detectChange(color, tmpColor)){
-                    command = setRGB(tmpColor[0], tmpColor[1], tmpColor[2]);
-                    jsonCommand = command.toJson() + "\r\n";
-                    send(jsonCommand);
-                    color = tmpColor;
-                    TimeUnit.MILLISECONDS.sleep(150);
+        if(screenToCheck.equals("left")){
+            while (true) {
+                try {
+                    monitorL.takeScreen();
+                    tmpColor = monitorL.fullShotAnalyse();
+                    if (Utils.detectChange(color, tmpColor)){
+                        command = setRGB(tmpColor[0], tmpColor[1], tmpColor[2]);
+                        jsonCommand = command.toJson() + "\r\n";
+                        send(jsonCommand);
+                        color = tmpColor;
+                        TimeUnit.MILLISECONDS.sleep(150);
+                    }
+                } catch (Exception e){
+                    System.out.println(e.getMessage());
                 }
-            } catch (Exception e){
-                System.out.println(e.getMessage());
+            }
+        } else {
+            while (true) {
+                try {
+                    monitorR.takeScreen();
+                    tmpColor = monitorR.fullShotAnalyse();
+                    if (Utils.detectChange(color, tmpColor)){
+                        command = setRGB(tmpColor[0], tmpColor[1], tmpColor[2]);
+                        jsonCommand = command.toJson() + "\r\n";
+                        send(jsonCommand);
+                        color = tmpColor;
+                        TimeUnit.MILLISECONDS.sleep(150);
+                    }
+                } catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
             }
         }
     }
@@ -75,7 +100,7 @@ class TCPServer {
      * @param datas Datas to send
      * @throws YeelightSocketException when socket error occurs
      */
-    public static void send(String datas) throws YeelightSocketException {
+    public void send(String datas) throws YeelightSocketException {
         try {
             socketWriterLit.write(datas);
             socketWriterLit.flush();
@@ -94,7 +119,7 @@ class TCPServer {
      * @throws YeelightResultErrorException when command result is an error
      * @throws YeelightSocketException when socket error occurs
      */
-    public static YeelightCommand setRGB(int r, int g, int b) throws YeelightResultErrorException, YeelightSocketException {
+    public YeelightCommand setRGB(int r, int g, int b) throws YeelightResultErrorException, YeelightSocketException {
         int rgbValue = clampAndComputeRGBValue(r, g, b);
         return new YeelightCommand("set_rgb", rgbValue, "smooth", 500);
     }

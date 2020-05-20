@@ -1,19 +1,17 @@
+import com.mollin.yapi.exception.YeelightResultErrorException;
+import com.mollin.yapi.exception.YeelightSocketException;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -25,15 +23,19 @@ import jfxtras.styles.jmetro.JMetroStyleClass;
 import jfxtras.styles.jmetro.Style;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Timer;
 
 // Java 8 code
-public class JavaFXTrayIconSample extends Application {
+public class YeenbilightApp extends Application {
 
     // application stage is stored so that it can be shown and hidden based on system tray icon operations.
     private Stage stage;
@@ -46,11 +48,15 @@ public class JavaFXTrayIconSample extends Application {
     // format used to display the current time in a tray icon notification.
     private DateFormat timeFormat = SimpleDateFormat.getTimeInstance();
 
+    private TCPServer server;
+
+    private LightManager manager;
+
     // sets up the javafx application.
     // a tray icon is setup for the icon, but the main stage remains invisible until the user
     // interacts with the tray icon.
     @Override
-    public void start(final Stage stage) throws IOException {
+    public void start(final Stage stage) throws IOException, AWTException, YeelightResultErrorException, YeelightSocketException {
         // stores a reference to the stage.
         this.stage = stage;
 
@@ -80,6 +86,15 @@ public class JavaFXTrayIconSample extends Application {
                 stage.hide();
             }
         });
+
+        //Create light instances in LightManager
+        manager = new LightManager();
+        manager.startConnectionLit();
+        manager.startConnectionPlafonier();
+
+        //Create server Instance
+        server = new TCPServer("192.168.1.24", 54321, "left");
+        server.start();
     }
 
     private HBox generateUI() throws FileNotFoundException {
@@ -89,13 +104,18 @@ public class JavaFXTrayIconSample extends Application {
 
         HBox mainLeftTop = new HBox();
         //Creating right screen button
-        ToggleButton  screen1 = new ToggleButton();
+        ToggleButton screen1 = new ToggleButton();
         ImageView screenView1 = new ImageView(new Image(new FileInputStream("D:\\Documents\\Workspace\\Yeenbilight\\src\\main\\resources\\screen_icon.png")));
         screenView1.setFitWidth(65);
         screenView1.setFitHeight(65);
         screen1.setGraphic(screenView1);
         screen1.setStyle("-fx-background-color: transparent");
         screen1.setFocusTraversable(false);
+        screen1.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
+                "    -fx-background-radius: 30;\n" +
+                "    -fx-background-insets: 0;\n" +
+                "    -fx-text-fill: white;");
+        screen1.setSelected(true);
         Label screen1Label = new Label("Screen 1");
         VBox screen1Container = new VBox();
         screen1Container.setAlignment(Pos.CENTER);
@@ -133,6 +153,11 @@ public class JavaFXTrayIconSample extends Application {
         light1.setGraphic(lightView1);
         light1.setStyle("-fx-background-color: transparent");
         light1.setFocusTraversable(false);
+        light1.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
+                "    -fx-background-radius: 30;\n" +
+                "    -fx-background-insets: 0;\n" +
+                "    -fx-text-fill: white;");
+        light1.setSelected(true);
         Label light1Label = new Label("Light 1");
         VBox light1Container = new VBox();
         light1Container.setAlignment(Pos.CENTER);
@@ -151,6 +176,11 @@ public class JavaFXTrayIconSample extends Application {
         light2.setGraphic(lightView2);
         light2.setStyle("-fx-background-color: #252525");
         light2.setFocusTraversable(false);
+        light2.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
+                "    -fx-background-radius: 30;\n" +
+                "    -fx-background-insets: 0;\n" +
+                "    -fx-text-fill: white;");
+        light2.setSelected(true);
         Label light2Label = new Label("Light 2");
         VBox light2Container = new VBox();
         light2Container.setAlignment(Pos.CENTER);
@@ -169,6 +199,7 @@ public class JavaFXTrayIconSample extends Application {
         slider.setMajorTickUnit(0.25f);
         slider.setBlockIncrement(0.1f);
         slider.setFocusTraversable(false);
+        slider.setValue(10);
         VBox sliderVbox = new VBox();
         Label sliderLabel = new Label("Brightness");
         sliderVbox.getChildren().add(slider);
@@ -190,56 +221,102 @@ public class JavaFXTrayIconSample extends Application {
 
         //Set all reaction to clicks on buttons
         screen1.setOnAction(event -> {
-            if(screen1.isSelected()){
+            if (screen1.isSelected()) {
                 screen1.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
                         "    -fx-background-radius: 30;\n" +
                         "    -fx-background-insets: 0;\n" +
                         "    -fx-text-fill: white;");
+                //utiliser cet écran
+                //ne plus utiliser l'autre et toggle l'autre button
             } else {
                 screen1.setStyle("-fx-background-color: transparent");
+                //arreter d'utiliser cet écran
             }
 
         });
 
         screen2.setOnAction(event -> {
-            if(screen2.isSelected()){
+            if (screen2.isSelected()) {
                 screen2.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
                         "    -fx-background-radius: 30;\n" +
                         "    -fx-background-insets: 0;\n" +
                         "    -fx-text-fill: white;");
+                //utiliser cet écran
+                //ne plus utiliser l'autre et toggle l'autre button
             } else {
                 screen2.setStyle("-fx-background-color: transparent");
+                //arreter d'utiliser cet écran
             }
         });
 
         light1.setOnAction(event -> {
-            if(light1.isSelected()){
+            if (light1.isSelected()) {
                 light1.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
                         "    -fx-background-radius: 30;\n" +
                         "    -fx-background-insets: 0;\n" +
                         "    -fx-text-fill: white;");
+                try {
+                    manager.powerOnLit();
+                    System.out.println("Lit start");
+                } catch (YeelightResultErrorException e) {
+                    e.printStackTrace();
+                } catch (YeelightSocketException e) {
+                    e.printStackTrace();
+                }
             } else {
                 light1.setStyle("-fx-background-color: transparent");
+                try {
+                    manager.powerOffLit();
+                    System.out.println("Lit stop");
+
+                    //Regler le "java.net.SocketException: Software caused connection abort: socket write error"
+                } catch (YeelightResultErrorException e) {
+                    e.printStackTrace();
+                } catch (YeelightSocketException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
         light2.setOnAction(event -> {
-            if(light2.isSelected()){
+            if (light2.isSelected()) {
                 light2.setStyle("-fx-background-color: linear-gradient(#ff5400, #be1d00);\n" +
                         "    -fx-background-radius: 30;\n" +
                         "    -fx-background-insets: 0;\n" +
                         "    -fx-text-fill: white;");
+                try {
+                    manager.powerOnPlafonier();
+                } catch (YeelightResultErrorException e) {
+                    e.printStackTrace();
+                } catch (YeelightSocketException e) {
+                    e.printStackTrace();
+                }
             } else {
                 light2.setStyle("-fx-background-color: transparent");
+                try {
+                    manager.powerOffPlafonier();
+                } catch (YeelightResultErrorException e) {
+                    e.printStackTrace();
+                } catch (YeelightSocketException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
-        slider.valueProperty().addListener((obs, o, n)->{
-            System.out.println(slider.getValue());
+        slider.setOnMouseReleased(event -> {
+            try {
+                manager.setBrightnessLit((int) slider.getValue());
+                manager.setBrightnessPlafonier((int) slider.getValue());
+            } catch (YeelightResultErrorException e) {
+                e.printStackTrace();
+            } catch (YeelightSocketException e) {
+                e.printStackTrace();
+            }
         });
 
         return main;
     }
+
     /**
      * Sets up a system tray icon for the application.
      */
@@ -357,7 +434,7 @@ public class JavaFXTrayIconSample extends Application {
         }
     }
 
-    public static void main(String[] args) throws IOException, java.awt.AWTException {
+    public static void main(String[] args) {
         // Just launches the JavaFX application.
         // Due to way the application is coded, the application will remain running
         // until the user selects the Exit menu option from the tray icon.
